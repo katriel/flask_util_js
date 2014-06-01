@@ -41,8 +41,10 @@ __version__ = '0.2.21'
 from flask import Response, Markup
 from flask import current_app
 from flask import render_template_string
+from flask import url_for
 
 FLASK_UTIL_JS_PATH = '/flask_util.js'
+FLASK_UTIL_JS_ENDPOINT = 'fujs'
 
 FLASK_UTIL_JS_TPL_STRING = '''
 {% autoescape false %}
@@ -117,13 +119,13 @@ class FlaskUtilJs(object):
         """
         if app:
             self.init_app(app)
-        
+
     def init_app(self, app):
         """
         安装到app上
         """
         path = app.config.get('FLASK_UTIL_JS_PATH', FLASK_UTIL_JS_PATH)
-        endpoint = app.config.get('FLASK_UTIL_JS_ENDPOINT', None)
+        endpoint = app.config.get('FLASK_UTIL_JS_ENDPOINT', FLASK_UTIL_JS_ENDPOINT)
 
         @app.route(path, endpoint=endpoint)
         def flask_util_js():
@@ -138,11 +140,11 @@ class FlaskUtilJs(object):
         @app.context_processor
         def inject_fujs():
             return dict(flask_util_js=self)
-        
+
         # 最后把数据写到实例里
         self._path = path
         self._endpoint = endpoint or flask_util_js.__name__
-            
+
     @property
     def path(self):
         return self._path
@@ -160,7 +162,7 @@ class FlaskUtilJs(object):
                 rule_map[rule.endpoint] = rule.rule
 
         data = render_template_string(
-            FLASK_UTIL_JS_TPL_STRING, 
+            FLASK_UTIL_JS_TPL_STRING,
             rule_map=rule_map,
             )
 
@@ -168,7 +170,7 @@ class FlaskUtilJs(object):
 
     @property
     def js(self):
-        return Markup('<script src="%s" type="text/javascript" charset="utf-8"></script>' % self.path)
+        return Markup('<script src="%s" type="text/javascript" charset="utf-8"></script>' % url_for(self.endpoint))
 
     @property
     def merge_js(self):
