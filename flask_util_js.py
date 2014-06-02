@@ -42,6 +42,7 @@ from flask import Response, Markup
 from flask import current_app
 from flask import render_template_string
 from flask import url_for
+from flask import request
 
 FLASK_UTIL_JS_PATH = '/flask_util.js'
 FLASK_UTIL_JS_ENDPOINT = 'fujs'
@@ -96,7 +97,7 @@ var flask_util = function() {
             url += '?'+query_string;
         }
 
-        return url;
+        return '{{ script_root }}'+url;
     }
 
     return {
@@ -164,6 +165,7 @@ class FlaskUtilJs(object):
         data = render_template_string(
             FLASK_UTIL_JS_TPL_STRING,
             rule_map=rule_map,
+            script_root=request.script_root
             )
 
         return data
